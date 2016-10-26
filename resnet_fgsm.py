@@ -16,6 +16,7 @@ from keras.utils import np_utils
 
 from PIL import Image
 import os
+import h5py
 
 FLAGS = flags.FLAGS
 
@@ -25,7 +26,8 @@ flags.DEFINE_integer('nb_classes', 1000, 'Number of classification classes')
 flags.DEFINE_integer('img_rows', 224, 'Input row dimension')
 flags.DEFINE_integer('img_cols', 224, 'Input column dimension')
 flags.DEFINE_integer('batch_size', 16, 'Size of training batches')
-flags.DEFINE_string('data_dir', '/storage-volume/data', 'Size of training batches')
+flags.DEFINE_string('data_dir', '/storage-volume/data', 'location of imagenet data')
+flags.DEFINE_string('storage', '/home/ubuntu/storage_volume', 'storage volume for writing dataset')
 
 def preprocess_input(x, dim_ordering='default'):
     if dim_ordering == 'default':
@@ -66,11 +68,11 @@ def unprocess_input(x, dim_ordering="default"):
     return x
 
 
-def data_resnet():
-    file_names = ['ILSVRC2012_val_000{0:05d}.JPEG'.format(i+1) for i in range(50000)]
+def data_resnet(start_ind, end_ind):
+    file_names = ['ILSVRC2012_val_000{0:05d}.JPEG'.format(i+1) for i in range(start_ind, end_ind)]
     labels = np.loadtxt('labels.txt')
-    images = np.empty((50000, 3, FLAGS.img_rows, FLAGS.img_cols))
-    for i in range(50000):
+    images = np.empty((end_ind - start_ind, 3, FLAGS.img_rows, FLAGS.img_cols))
+    for i in range(start_ind, end_ind):
         image = image_utils.load_img(os.path.join(FLAGS.data_dir, 'ILSVRC2012_img_val/{0}'.format(file_names[i])))
         image = image_utils.img_to_array(image)
         image = np.expand_dims(image, axis=0)
@@ -78,15 +80,10 @@ def data_resnet():
         images[i,:,:,:] = image
 
     images = images.astype('float32')
+    X = images
+    Y = np_utils.to_categorical(labels[start_ind, end_ind], FLAGS.nb_classes)
 
-    X_train, Y_train = images[:40000,:,:,:], labels[:40000]
-    X_test, Y_test = images[40000:,:,:,:], labels[40000:]
-
-    # # convert class vectors to binary class matrices
-    Y_train = np_utils.to_categorical(Y_train, FLAGS.nb_classes)
-    Y_test = np_utils.to_categorical(Y_test, FLAGS.nb_classes)
-
-    return X_train, Y_train, X_test, Y_test
+    return X, Y
 
 def main(argv=None):
     """
@@ -119,35 +116,57 @@ def main(argv=None):
     print "Defined TensorFlow model graph."
 
 
-    # Evaluate the accuracy of the MNIST model on legitimate test examples
-    # accuracy = tf_model_eval(sess, x, y, predictions, X_test, Y_test)
-    # print 'Test accuracy on legitimate test examples: ' + str(accuracy)
-    # normal_predictions = sess.run(tf.argmax(predictions, 1), feed_dict={x: X_test, keras.backend.learning_phase(): 1})
-
-
     # Craft adversarial examples using Fast Gradient Sign Method (FGSM)
     adv_x = fgsm(x, predictions, eps=0.3)
-    
-    X_train_normal= X_train_split[:34000,:,:,:]
-    X_train_adv, = batch_eval(sess, [x], [adv_x], [X_train_split[34000:,:,:,:]])
-    X_train = np.vstack((X_train_normal, X_train_adv))
-    assert X_train.shape == X_train_split.shape
-    np.save('X_train.npy', X_train)
-    np.save('labels_train.npy', Y_train_split)
-    np.save('adv_train.npy', np.array([0]*34000 + [1]*16000))
+
+
+    num_train_images = 8000
+    num_test_images = 2000
+    proc_batch_size = 1000
+    num_normal_batch = 850
+    num_adv_batch = proc_batch_size - num_normal_batch
+
+    f = h5py.File(os.path.join(FLAGS.storage, 'data.h5'))
+    f.create_dataset('X_train', (num_train_images, 3, FLAGS.img_rows, FLAGS.img_cols))
+    f.create_dataset('labels_train', (num_train_images, FLAGS.nb_classes))
+    f.create_dataset('adversarial_labels_train', (num_train_images, 2))
+    f.create_dataset('X_test', (num_test_images, 3, FLAGS.img_rows, FLAGS.img_cols))
+    f.create_dataset('labels_test', (num_test_images, FLAGS.nb_classes))
+    f.create_dataset('adversarial_labels_test', (num_test_images, 2))
+
+    #Generate training images
+    for i in np.arange(0, num_train_images, proc_batch_size):
+        X, Y = data_resnet(i, i+proc_batch_size)
+        X_adv = batch_eval(sess, [x], [adv_x], [X[num_normal_batch:,:,:,:]])
+        X_norm = X[:num_normal_batch,:,:,:]
+        f['X_train'][i:i+num_normal_batch, :]  = X_norm
+        f['X_train'][i+num_normal_batch:i+proc_batch_size, :]  = X_norm
+
+        f['labels_train'][i:i+proc_batch_size, :] = Y
+        f['adversarial_labels_train'][i:i+proc_batch_size, :] = np_utils.to_categorical(np.array([0]*num_normal_batch + [1]*num_adv_batch))
+        f.flush()
+
     print "Generated Training Data"
 
-    X_test_normal= X_test_split[:8500,:,:,:]
-    X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test_split[8500:,:,:,:]])
-    X_test = np.vstack((X_test_normal, X_test_adv))
-    assert X_test.shape == X_test_split.shape
-    np.save('X_test.npy', X_test)
-    np.save('labels_test.npy', Y_test_split)
-    np.save('adv_test.npy', np.array([0]*8500 + [1]*1500))
+    #Generate test images
+    for i in np.arange(0, num_test_images, proc_batch_size):
+        #start at end of training data
+        i += num_train_images
+
+        X, Y = data_resnet(i, i+proc_batch_size)
+        X_adv = batch_eval(sess, [x], [adv_x], [X[num_normal_batch:,:,:,:]])
+        X_norm = X[:num_normal_batch,:,:,:]
+        f['X_test'][i:i+num_normal_batch, :]  = X_norm
+        f['X_test'][i+num_normal_batch:i+proc_batch_size, :]  = X_norm
+
+        f['labels_test'][i:i+proc_batch_size, :] = Y
+        f['adversarial_labels_test'][i:i+proc_batch_size, :] = np_utils.to_categorical(np.array([0]*num_normal_batch + [1]*num_adv_batch))
+        f.flush()
+        
     print "Generated Test Data"
 
+    f.close()
 
-    # adv_predictions = sess.run(tf.argmax(predictions, 1), feed_dict={x: X_test_adv, keras.backend.learning_phase(): 1})
 
     #Show Images
     # for i in range(len(normal_predictions)):
@@ -157,11 +176,6 @@ def main(argv=None):
     #         break
     
     
-
-    # Evaluate the accuracy of the MNIST model on adversarial examples
-    # accuracy = tf_model_eval(sess, x, y, predictions, X_test_adv, Y_test)
-    # print'Test accuracy on adversarial examples: ' + str(accuracy)
-
 def view_image(processed_image):
     print processed_image.shape
     img = Image.fromarray(np.uint8(unprocess_input(processed_image).transpose((1,2,0))))
