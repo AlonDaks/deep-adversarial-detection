@@ -100,10 +100,6 @@ def main(argv=None):
     keras.backend.set_session(sess)
     print "Created TensorFlow session and set Keras backend."
 
-    # Get MNIST test data
-    X_train_split, Y_train_split, X_test_split, Y_test_split = data_resnet()
-    print "Loaded ImageNet test data."
-
 
     # Define input TF placeholder
     x = tf.placeholder(tf.float32, shape=(None, 3, 224, 224))
