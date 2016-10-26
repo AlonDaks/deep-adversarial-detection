@@ -81,7 +81,7 @@ def data_resnet(start_ind, end_ind):
 
     images = images.astype('float32')
     X = images
-    Y = np_utils.to_categorical(labels[start_ind, end_ind], FLAGS.nb_classes)
+    Y = np_utils.to_categorical(labels[start_ind:end_ind], FLAGS.nb_classes)
 
     return X, Y
 
