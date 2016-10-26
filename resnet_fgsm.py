@@ -136,7 +136,7 @@ def main(argv=None):
         X_adv = batch_eval(sess, [x], [adv_x], [X[num_normal_batch:,:,:,:]])
         X_norm = X[:num_normal_batch,:,:,:]
         f['X_train'][i:i+num_normal_batch, :]  = X_norm
-        f['X_train'][i+num_normal_batch:i+proc_batch_size, :]  = X_norm
+        f['X_train'][i+num_normal_batch:i+proc_batch_size, :]  = X_adv
 
         f['labels_train'][i:i+proc_batch_size, :] = Y
         f['adversarial_labels_train'][i:i+proc_batch_size, :] = np_utils.to_categorical(np.array([0]*num_normal_batch + [1]*num_adv_batch))
@@ -153,7 +153,7 @@ def main(argv=None):
         X_adv = batch_eval(sess, [x], [adv_x], [X[num_normal_batch:,:,:,:]])
         X_norm = X[:num_normal_batch,:,:,:]
         f['X_test'][i:i+num_normal_batch, :]  = X_norm
-        f['X_test'][i+num_normal_batch:i+proc_batch_size, :]  = X_norm
+        f['X_test'][i+num_normal_batch:i+proc_batch_size, :]  = X_adv
 
         f['labels_test'][i:i+proc_batch_size, :] = Y
         f['adversarial_labels_test'][i:i+proc_batch_size, :] = np_utils.to_categorical(np.array([0]*num_normal_batch + [1]*num_adv_batch))
