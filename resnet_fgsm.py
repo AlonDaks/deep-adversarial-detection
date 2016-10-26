@@ -130,18 +130,18 @@ def main(argv=None):
     X_train_adv, = batch_eval(sess, [x], [adv_x], [X_train_split[34000:,:,:,:]])
     X_train = np.concatenate(X_train_normal, X_train_adv, axis=0)
     assert X_train.shape == X_train_split.shape
-    np.savetxt('X_train.txt', X_train)
-    np.savetxt('labels_train.txt', Y_train_split)
-    np.savetxt('adv_train.txt', np.array([0]*34000 + [1]*16000))
+    np.save('X_train.txt', X_train)
+    np.save('labels_train.txt', Y_train_split)
+    np.save('adv_train.txt', np.array([0]*34000 + [1]*16000))
     print "Generated Training Data"
 
     X_test_normal= X_test_split[:8500,:,:,:]
     X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test_split[8500:,:,:,:]])
     X_test = np.concatenate(X_test_normal, X_test_adv, axis=0)
     assert X_test.shape == X_test_split.shape
-    np.savetxt('X_test.txt', X_test)
-    np.savetxt('labels_test.txt', Y_test_split)
-    np.savetxt('adv_test.txt', np.array([0]*8500 + [1]*1500))
+    np.save('X_test.txt', X_test)
+    np.save('labels_test.txt', Y_test_split)
+    np.save('adv_test.txt', np.array([0]*8500 + [1]*1500))
     print "Generated Test Data"
 
 
