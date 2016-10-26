@@ -12,7 +12,7 @@ sudo python get-pip.py
 rm get-pip.py
 
 #Install cuDNN
-tar -xzvf cudnn-7.5-linux-x64-v5.0-ga.tgz -C ~
+tar -xvf cudnn-8.0-linux-x64-v5.1.tgz -C ~
 pushd ~
 sudo cp cuda/include/cudnn.h /usr/local/cuda/include
 sudo cp cuda/lib64/libcudnn* /usr/local/cuda/lib64
