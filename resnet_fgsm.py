@@ -15,6 +15,7 @@ from keras.applications.resnet50 import ResNet50
 from keras.utils import np_utils
 
 from PIL import Image
+import os
 
 FLAGS = flags.FLAGS
 
@@ -24,6 +25,7 @@ flags.DEFINE_integer('nb_classes', 1000, 'Number of classification classes')
 flags.DEFINE_integer('img_rows', 224, 'Input row dimension')
 flags.DEFINE_integer('img_cols', 224, 'Input column dimension')
 flags.DEFINE_integer('batch_size', 128, 'Size of training batches')
+flags.DEFINE_string('data_dir', '/storage-volume/data', 'Size of training batches')
 
 def preprocess_input(x, dim_ordering='default'):
     if dim_ordering == 'default':
@@ -69,7 +71,7 @@ def data_resnet():
     labels = np.loadtxt('labels.txt')
     images = np.empty((50000, 3, FLAGS.img_rows, FLAGS.img_cols))
     for i in range(50000):
-        image = image_utils.load_img('./ILSVRC2012_img_val/{0}'.format(file_names[i]))
+        image = image_utils.load_img(os.path.join(FLAGS.data_dir, 'ILSVRC2012_img_val/{0}'.format(file_names[i])))
         image = image_utils.img_to_array(image)
         image = np.expand_dims(image, axis=0)
         image = preprocess_input(image)
