@@ -73,7 +73,7 @@ def data_resnet(start_ind, end_ind):
     labels = np.loadtxt('labels.txt')
     images = np.empty((end_ind - start_ind, 3, FLAGS.img_rows, FLAGS.img_cols))
     for i in range(start_ind, end_ind):
-        image = image_utils.load_img(os.path.join(FLAGS.data_dir, 'ILSVRC2012_img_val/{0}'.format(file_names[i])))
+        image = image_utils.load_img(os.path.join(FLAGS.data_dir, file_names[i]), target_size=(224,224))
         image = image_utils.img_to_array(image)
         image = np.expand_dims(image, axis=0)
         image = preprocess_input(image)
