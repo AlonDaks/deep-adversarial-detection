@@ -1,4 +1,3 @@
-sudo apt-get install git
 sudo apt-get install pip
 sudo apt-get install cuda
 sudo apt-get install imagemagick
