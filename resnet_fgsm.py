@@ -65,25 +65,25 @@ def unprocess_input(x, dim_ordering="default"):
 
 
 def data_resnet():
-    file_names = ['ILSVRC2012_val_00000{0:03d}.JPEG'.format(i+1) for i in range(100)]
-    labels = [65,970,230,809,516,57,334,415,674,332,109,286,370,757,595,147,108,23,478,517,334,173,948,727,23,846,270,167,55,858,324,573,150,981,586,887,32,398,777,74,516,756,129,198,256,725,565,167,717,394,92,29,844,591,358,468,259,994,872,588,474,183,107,46,842,390,101,887,870,841,467,149,21,476,80,424,159,275,175,461,970,160,788,58,479,498,369,28,487,50,270,383,366,780,373,705,330,142,949,349]
-    images = np.empty((100, 3, FLAGS.img_rows, FLAGS.img_cols))
-    for i in range(100):
-        image = image_utils.load_img('./ILSVRC2012_img_val/{0}'.format(file_names[i]), target_size=(224, 224))
+    file_names = ['ILSVRC2012_val_000{0:05d}.JPEG'.format(i+1) for i in range(50000)]
+    labels = np.loadtxt('labels.txt')
+    images = np.empty((50000, 3, FLAGS.img_rows, FLAGS.img_cols))
+    for i in range(50000):
+        image = image_utils.load_img('./ILSVRC2012_img_val/{0}'.format(file_names[i]))
         image = image_utils.img_to_array(image)
         image = np.expand_dims(image, axis=0)
-        image = preprocess_input(image)        
+        image = preprocess_input(image)
         images[i,:,:,:] = image
 
     images = images.astype('float32')
 
-    X_train, Y_train = images[:5,:,:,:], labels[:5]
-    X_test, Y_test = images[50:,:,:,:], labels[50:]
-    
+    X_train, Y_train = images[:40000,:,:,:], labels[:40000]
+    X_test, Y_test = images[40000:,:,:,:], labels[40000:]
 
     # # convert class vectors to binary class matrices
     Y_train = np_utils.to_categorical(Y_train, FLAGS.nb_classes)
     Y_test = np_utils.to_categorical(Y_test, FLAGS.nb_classes)
+
     return X_train, Y_train, X_test, Y_test
 
 def main(argv=None):
@@ -102,7 +102,7 @@ def main(argv=None):
     print "Created TensorFlow session and set Keras backend."
 
     # Get MNIST test data
-    X_train, Y_train, X_test, Y_test = data_resnet()
+    X_train_split, Y_train_split, X_test_split, Y_test_split = data_resnet()
     print "Loaded ImageNet test data."
 
 
@@ -120,22 +120,39 @@ def main(argv=None):
     # Evaluate the accuracy of the MNIST model on legitimate test examples
     # accuracy = tf_model_eval(sess, x, y, predictions, X_test, Y_test)
     # print 'Test accuracy on legitimate test examples: ' + str(accuracy)
-    normal_predictions = sess.run(tf.argmax(predictions, 1), feed_dict={x: X_test, keras.backend.learning_phase(): 1})
+    # normal_predictions = sess.run(tf.argmax(predictions, 1), feed_dict={x: X_test, keras.backend.learning_phase(): 1})
 
 
     # Craft adversarial examples using Fast Gradient Sign Method (FGSM)
     adv_x = fgsm(x, predictions, eps=0.3)
-    X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test])
+    
+    X_train_normal= X_train_split[:34000,:,:,:]
+    X_train_adv, = batch_eval(sess, [x], [adv_x], [X_train_split[34000:,:,:,:]])
+    X_train = np.concatenate(X_train_normal, X_train_adv, axis=0)
+    assert X_train.shape == X_train_split.shape
+    np.savetxt('X_train.txt', X_train)
+    np.savetxt('labels_train.txt', Y_train_split)
+    np.savetxt('adv_train.txt', np.array([0]*34000 + [1]*16000))
+    print "Generated Training Data"
 
-    adv_predictions = sess.run(tf.argmax(predictions, 1), feed_dict={x: X_test_adv, keras.backend.learning_phase(): 1})
+    X_test_normal= X_test_split[:8500,:,:,:]
+    X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test_split[8500:,:,:,:]])
+    X_test = np.concatenate(X_test_normal, X_test_adv, axis=0)
+    assert X_test.shape == X_test_split.shape
+    np.savetxt('X_test.txt', X_test)
+    np.savetxt('labels_test.txt', Y_test_split)
+    np.savetxt('adv_test.txt', np.array([0]*8500 + [1]*1500))
+    print "Generated Test Data"
 
-    for i in range(len(normal_predictions)):
-        if normal_predictions[i] == np.argmax(Y_test[i,:]) and adv_predictions[i] != np.argmax(Y_test[i,:]):
-            comp = np.hstack([X_test[i,:,:,:], X_test_adv[i,:,:,:]])
-            view_image(comp)
-            break
-    else:
-        print("No adversarial examples.")
+
+    # adv_predictions = sess.run(tf.argmax(predictions, 1), feed_dict={x: X_test_adv, keras.backend.learning_phase(): 1})
+
+    #Show Images
+    # for i in range(len(normal_predictions)):
+    #     if normal_predictions[i] == np.argmax(Y_test[i,:]) and adv_predictions[i] != np.argmax(Y_test[i,:]):
+    #         comp = np.hstack([X_test[i,:,:,:], X_test_adv[i,:,:,:]])
+    #         view_image(comp)
+    #         break
     
     
 
