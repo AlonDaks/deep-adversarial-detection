@@ -1,10 +1,10 @@
 sudo apt-get install imagemagick
 
-wget http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb
-sudo dpkg -i cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb
+wget https://developer.nvidia.com/compute/cuda/8.0/prod/local_installers/cuda-repo-ubuntu1404-8-0-local_8.0.44-1_amd64-deb
+sudo dpkg -i cuda-repo-ubuntu1404-8-0-local_8.0.44-1_amd64.deb
 sudo apt-get update
 sudo apt-get install cuda
-rm cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb
+rm cuda-repo-ubuntu1404-8-0-local_8.0.44-1_amd64.deb
 
 
 wget https://bootstrap.pypa.io/get-pip.py
@@ -21,12 +21,14 @@ popd
 
 sudo pip install -r requirements.txt
 
-export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow-0.9.0-cp27-none-linux_x86_64.whl
+export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/gpu/tensorflow-0.11.0rc1-cp27-none-linux_x86_64.whl
 sudo pip install --upgrade $TF_BINARY_URL
 
 pushd ~
-git clone https://github.com/openai/cleverhans.git
-export PYTHONPATH="~/cleverhans":$PYTHONPATH
+if [ ! -d cleverhans ]; then
+	git clone https://github.com/openai/cleverhans.git
+	export PYTHONPATH="~/cleverhans":$PYTHONPATH
+fi
 popd
 
 source config.sh
