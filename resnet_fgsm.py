@@ -26,7 +26,7 @@ flags.DEFINE_integer('nb_classes', 1000, 'Number of classification classes')
 flags.DEFINE_integer('img_rows', 224, 'Input row dimension')
 flags.DEFINE_integer('img_cols', 224, 'Input column dimension')
 flags.DEFINE_integer('batch_size', 16, 'Size of training batches')
-flags.DEFINE_string('data_dir', '/home/ubuntu/storage-volume/data', 'location of imagenet data')
+flags.DEFINE_string('data_dir', '/home/ubuntu/storage_volume/data', 'location of imagenet data')
 flags.DEFINE_string('storage', '/home/ubuntu/storage_volume', 'storage volume for writing dataset')
 
 def preprocess_input(x, dim_ordering='default'):
@@ -122,13 +122,13 @@ def main(argv=None):
     num_normal_batch = 850
     num_adv_batch = proc_batch_size - num_normal_batch
 
-    f = h5py.File(os.path.join(FLAGS.storage, 'data.h5'))
-    f.create_dataset('X_train', (num_train_images, 3, FLAGS.img_rows, FLAGS.img_cols))
-    f.create_dataset('labels_train', (num_train_images, FLAGS.nb_classes))
-    f.create_dataset('adversarial_labels_train', (num_train_images, 2))
-    f.create_dataset('X_test', (num_test_images, 3, FLAGS.img_rows, FLAGS.img_cols))
-    f.create_dataset('labels_test', (num_test_images, FLAGS.nb_classes))
-    f.create_dataset('adversarial_labels_test', (num_test_images, 2))
+    f = h5py.File(os.path.join(FLAGS.storage, 'data.h5'), 'w')
+    f.create_dataset('X_train', (num_train_images, 3, FLAGS.img_rows, FLAGS.img_cols), chunks=True)
+    f.create_dataset('labels_train', (num_train_images, FLAGS.nb_classes), chunks=True)
+    f.create_dataset('adversarial_labels_train', (num_train_images, 2), chunks=True)
+    f.create_dataset('X_test', (num_test_images, 3, FLAGS.img_rows, FLAGS.img_cols), chunks=True)
+    f.create_dataset('labels_test', (num_test_images, FLAGS.nb_classes), chunks=True)
+    f.create_dataset('adversarial_labels_test', (num_test_images, 2), chunks=True)
 
     #Generate training images
     for i in np.arange(0, num_train_images, proc_batch_size):
