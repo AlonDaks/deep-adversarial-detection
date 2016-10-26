@@ -116,10 +116,10 @@ def main(argv=None):
     adv_x = fgsm(x, predictions, eps=0.3)
 
 
-    num_train_images = 8000
-    num_test_images = 2000
-    proc_batch_size = 1000
-    num_normal_batch = 850
+    num_train_images = 40000
+    num_test_images = 10000
+    proc_batch_size = 5000
+    num_normal_batch = 4250
     num_adv_batch = proc_batch_size - num_normal_batch
 
     f = h5py.File(os.path.join(FLAGS.storage, 'data.h5'), 'w')
