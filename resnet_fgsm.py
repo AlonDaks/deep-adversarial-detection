@@ -26,7 +26,7 @@ flags.DEFINE_integer('nb_classes', 1000, 'Number of classification classes')
 flags.DEFINE_integer('img_rows', 224, 'Input row dimension')
 flags.DEFINE_integer('img_cols', 224, 'Input column dimension')
 flags.DEFINE_integer('batch_size', 16, 'Size of training batches')
-flags.DEFINE_string('data_dir', '/storage-volume/data', 'location of imagenet data')
+flags.DEFINE_string('data_dir', '/home/ubuntu/storage-volume/data', 'location of imagenet data')
 flags.DEFINE_string('storage', '/home/ubuntu/storage_volume', 'storage volume for writing dataset')
 
 def preprocess_input(x, dim_ordering='default'):
