@@ -1,12 +1,18 @@
-sudo apt-get install pip
-sudo apt-get install cuda
 sudo apt-get install imagemagick
 
+wget http://developer.download.nvidia.com/compute/cuda/7.5/Prod/local_installers/cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb
+sudo dpkg -i cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb
+sudo apt-get update
+sudo apt-get install cuda
+rm cuda-repo-ubuntu1404-7-5-local_7.5-18_amd64.deb
+
+
+wget https://bootstrap.pypa.io/get-pip.py
+sudo python get-pip.py
+rm get-pip.py
+
 #Install cuDNN
-tar -xzvf cudnn-7.0-linux-ppc64le-v4.0-prod.tgz -C ~/cudnn
-pushd ~/cudnn
-export LD_LIBRARY_PATH=`pwd`:$LD_LIBRARY_PATH
-popd
+tar -xzvf cudnn-7.0-linux-ppc64le-v4.0-prod.tgz -C ~
 
 sudo pip install -r requirements.txt
 
@@ -17,3 +23,5 @@ pushd ~
 git clone https://github.com/openai/cleverhans.git
 export PYTHONPATH="~/cleverhans":$PYTHONPATH
 popd
+
+source config.sh
