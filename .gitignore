@@ -96,3 +96,5 @@ inception-model
 ILSVRC2012_devkit_t12/
 ILSVRC2012_img_val.tar
 ILSVRC2012_img_val/
+*.npy
+log.txt

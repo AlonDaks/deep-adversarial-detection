@@ -24,7 +24,7 @@ flags.DEFINE_string('filename', 'mnist.ckpt', 'Filename to save model under.')
 flags.DEFINE_integer('nb_classes', 1000, 'Number of classification classes')
 flags.DEFINE_integer('img_rows', 224, 'Input row dimension')
 flags.DEFINE_integer('img_cols', 224, 'Input column dimension')
-flags.DEFINE_integer('batch_size', 128, 'Size of training batches')
+flags.DEFINE_integer('batch_size', 16, 'Size of training batches')
 flags.DEFINE_string('data_dir', '/storage-volume/data', 'Size of training batches')
 
 def preprocess_input(x, dim_ordering='default'):
@@ -130,7 +130,7 @@ def main(argv=None):
     
     X_train_normal= X_train_split[:34000,:,:,:]
     X_train_adv, = batch_eval(sess, [x], [adv_x], [X_train_split[34000:,:,:,:]])
-    X_train = np.concatenate(X_train_normal, X_train_adv, axis=0)
+    X_train = np.vstack((X_train_normal, X_train_adv))
     assert X_train.shape == X_train_split.shape
     np.save('X_train.npy', X_train)
     np.save('labels_train.npy', Y_train_split)
@@ -139,7 +139,7 @@ def main(argv=None):
 
     X_test_normal= X_test_split[:8500,:,:,:]
     X_test_adv, = batch_eval(sess, [x], [adv_x], [X_test_split[8500:,:,:,:]])
-    X_test = np.concatenate(X_test_normal, X_test_adv, axis=0)
+    X_test = np.vstack((X_test_normal, X_test_adv))
     assert X_test.shape == X_test_split.shape
     np.save('X_test.npy', X_test)
     np.save('labels_test.npy', Y_test_split)
