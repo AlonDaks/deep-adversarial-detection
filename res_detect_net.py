@@ -33,6 +33,7 @@ def res_detect_net():
     base_model = ResNet50(include_top=False, input_tensor=x)
     
     y = base_model.output
+    y = Flatten()(y)
     y = Dense(2048, activation='relu')(y)
     y = Dense(2048, activation='relu')(y)
     predictions = Dense(2, activation='softmax')(y)
@@ -51,7 +52,7 @@ def main():
     data = h5py.File(os.path.join(FLAGS.data_dir, 'data.h5'), 'r')
     K.set_image_dim_ordering('th')
     model, x, y = res_detect_net()
-    
+
     model.fit(data['X_train'], data['adversarial_labels_train'])
 
 
