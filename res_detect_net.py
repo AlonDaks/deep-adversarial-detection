@@ -43,7 +43,8 @@ def res_detect_net():
 
     for layer in base_model.layers:
         layer.trainable = False
-
+        
+    model = make_parallel(model, 4)
     model.compile(optimizer='rmsprop', loss='binary_crossentropy')
 
     return model, x
@@ -54,7 +55,7 @@ def main():
     K.set_image_dim_ordering('th')
     model, x = res_detect_net()
 
-    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch')
+    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=2048*4)
     model.save('/home/ubuntu/storage_volume/res_detect_net.h5')
 
 
