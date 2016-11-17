@@ -22,7 +22,7 @@ flags.DEFINE_integer('nb_classes', 1000, 'Number of classification classes')
 flags.DEFINE_integer('img_rows', 224, 'Input row dimension')
 flags.DEFINE_integer('img_cols', 224, 'Input column dimension')
 flags.DEFINE_integer('batch_size', 16, 'Size of training batches')
-flags.DEFINE_string('data_dir', '/home/ubuntu/storage_volume/data', 'Size of training batches')
+flags.DEFINE_string('data_dir', '/home/ubuntu/storage_volume', 'Size of training batches')
 
 
 def res_detect_net():
@@ -44,7 +44,7 @@ def res_detect_net():
 
 
 def main():
-    data = h5py(os.path.join(flags.data_dir, 'data.h5'))
+    data = h5py.File(os.path.join(FLAGS.data_dir, 'data.h5'), 'r')
     model, x, y = res_detect_net()
     
     model.fit(data['X_train'], data['adversarial_labels_train'])
