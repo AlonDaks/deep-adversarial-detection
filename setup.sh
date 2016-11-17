@@ -1,6 +1,5 @@
-
-mkdir storage_volume
-sudo mount /dev/xvda1 storage_volume
+mkdir ../storage_volume
+sudo mount /dev/xvdf ../storage_volume
 
 sudo apt-get install python
 sudo apt-get install imagemagick
