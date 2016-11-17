@@ -9,6 +9,7 @@ from tensorflow.python.platform import flags
 
 from keras.applications.resnet50 import ResNet50
 from keras.utils import np_utils
+from keras.layers import Dense
 
 from PIL import Image
 import os
@@ -28,19 +29,22 @@ flags.DEFINE_string('data_dir', '/home/ubuntu/storage_volume', 'Size of training
 def res_detect_net():
     # Define input TF placeholder
     x = tf.placeholder(tf.float32, shape=(None, 3, 224, 224))
-    y = tf.placeholder(tf.float32, shape=(None, FLAGS.nb_classes))
 
-    network = ResNet50(include_top=False, input_tensor=x)
-    for layer in network.layers:
+    base_model = ResNet50(include_top=False, input_tensor=x)
+    
+    y = base_model.output
+    y = Dense(2048, activation='relu')(y)
+    y = Dense(2048, activation='relu')(y)
+    predictions = Dense(2, activation='softmax')(y)
+
+    model = Model(input=base_model.input, output=predictions)
+
+    for layer in base_model.layers:
         layer.trainable = False
 
-    network.add(Dense(2048), activation='relu')
-    network.add(Dense(2048), activation='relu')
-    network.add(Dense(2), activation='softmax')
+    model.compile(optimizer='rmsprop', loss='binary_crossentropy')
 
-    network.compile(optimizer='adam', loss='binary_crossentropy')
-
-    return network, x, y
+    return model, x
 
 
 def main():
