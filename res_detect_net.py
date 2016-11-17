@@ -45,6 +45,7 @@ def res_detect_net():
 
 def main():
     data = h5py.File(os.path.join(FLAGS.data_dir, 'data.h5'), 'r')
+    K.set_image_dim_ordering('th')
     model, x, y = res_detect_net()
     
     model.fit(data['X_train'], data['adversarial_labels_train'])
