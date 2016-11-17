@@ -8,8 +8,9 @@ from tensorflow.python.platform import app
 from tensorflow.python.platform import flags
 
 from keras.applications.resnet50 import ResNet50
+from keras.models import Model
 from keras.utils import np_utils
-from keras.layers import Dense
+from keras.layers import Dense, Flatten
 
 from PIL import Image
 import os
@@ -51,9 +52,10 @@ def res_detect_net():
 def main():
     data = h5py.File(os.path.join(FLAGS.data_dir, 'data.h5'), 'r')
     K.set_image_dim_ordering('th')
-    model, x, y = res_detect_net()
+    model, x = res_detect_net()
 
-    model.fit(data['X_train'], data['adversarial_labels_train'])
+    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch')
+    model.save('/home/ubuntu/storage_volume/res_detect_net.h5')
 
 
 if __name__ == '__main__':
