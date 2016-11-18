@@ -18,6 +18,7 @@ import h5py
 
 from keras.layers import merge
 from keras.layers.core import Lambda
+from keras.callbacks import ModelCheckpoint
 
 def make_parallel(model, gpu_count):
     def get_slice(data, idx, parts):
@@ -101,8 +102,10 @@ def main():
     K.set_image_dim_ordering('th')
     model, x = res_detect_net()
 
-    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4)
-    model.save('/home/ubuntu/storage_volume/res_detect_net.h5')
+    checkpointer = weights.{epoch:02d}-{val_loss:.2f}.hdf5
+    checkpointer = ModelCheckpoint(filepath="/home/ubuntu/storage_volume/res_detect_net/weights.{epoch:02d}-{val_loss:.2f}.hdf5")
+    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, callbacks=[checkpointer])
+    model.save('/home/ubuntu/storage_volume/res_detect_net/res_detect_net.h5')
 
 
 if __name__ == '__main__':
