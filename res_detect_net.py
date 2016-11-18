@@ -7,7 +7,7 @@ import tensorflow as tf
 from tensorflow.python.platform import app
 from tensorflow.python.platform import flags
 
-from keras.applications.resnet50 import ResNet50
+from resnet50 import ResNet50
 from keras.models import Model
 from keras.utils import np_utils
 from keras.layers import Dense, Flatten
@@ -86,6 +86,8 @@ def res_detect_net():
     model = Model(input=base_model.input, output=predictions)
 
     for layer in base_model.layers:
+        if type(layer) == keras.layers.normalization.BatchNormalization:
+            layer.mode = 2
         layer.trainable = False
 
     model = make_parallel(model, 4)
