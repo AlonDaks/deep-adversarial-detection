@@ -112,7 +112,10 @@ def validate():
     # model = load_model('/home/ubuntu/storage_volume/res_detect_net/res_detect_net.h5')
     model, _ = res_detect_net()
     model.load_weights('/home/ubuntu/storage_volume/res_detect_net/res_detect_net.h5')
-    predicted_values = model.predict(data['X_test'], batch_size=128, verbose=1)
+    indices = np.random.permutation(range(10000))[:1000]
+    predicted_values = model.predict(data['X_test'][indices,:], batch_size=128, verbose=1)
+    np.savetxt('pred.txt', predicted_values)
+    true_values = data['adversarial_labels_test'][indices]
     print np.mean(data['adversarial_labels_test'] == predicted_values)
 
 
