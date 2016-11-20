@@ -8,7 +8,7 @@ from tensorflow.python.platform import app
 from tensorflow.python.platform import flags
 
 from resnet50 import ResNet50
-from keras.models import Model
+from keras.models import Model, load_model
 from keras.utils import np_utils
 from keras.layers import Dense, Flatten
 
@@ -106,7 +106,17 @@ def main():
     model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, callbacks=[checkpointer])
     model.save('/home/ubuntu/storage_volume/res_detect_net/res_detect_net.h5')
 
+def validate():
+    data = h5py.File(os.path.join(FLAGS.data_dir, 'data.h5'), 'r')
+    K.set_image_dim_ordering('th')
+    # model = load_model('/home/ubuntu/storage_volume/res_detect_net/res_detect_net.h5')
+    model, _ = res_detect_net()
+    model.load_weights('/home/ubuntu/storage_volume/res_detect_net/res_detect_net.h5')
+    predicted_values = model.predict(data['X_test'], batch_size=128, verbose=1)
+    print np.mean(data['adversarial_labels_test'] == predicted_values)
+
 
 if __name__ == '__main__':
-    main()
+    # main()
+    validate()
 
