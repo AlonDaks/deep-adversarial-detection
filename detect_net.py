@@ -10,7 +10,7 @@ from tensorflow.python.platform import flags
 from resnet50 import ResNet50
 from keras.models import Model, load_model
 from keras.utils import np_utils
-from keras.layers import Dense, Flatten, Convolution2D, MaxPooling2D, ZeroPadding2D, AveragePooling2D, BatchNormalization
+from keras.layers import Dense, Activation, Flatten, Convolution2D, MaxPooling2D, ZeroPadding2D, AveragePooling2D, BatchNormalization
 
 from PIL import Image
 import os
@@ -97,7 +97,7 @@ def res_detect_net():
     return model, x
 
 
-def alex_detect_net():
+def alex_detect_net(mode=2):
 
     # Define input TF placeholder
     x = tf.placeholder(tf.float32, shape=(None, 3, 224, 224))
@@ -132,10 +132,12 @@ def alex_detect_net():
     y = BatchNormalization(axis=bn_axis, name='bn_conv5', mode=mode)(y)
     y = Activation('relu')(y)
 
+    y = MaxPooling2D((3, 3), strides=(2, 2))(y)
+
     y = Flatten()(y)
-    y = Dense(1024, activation='relu', name='fc1')(y)
-    y = Dense(1024, activation='relu', name='fc2')(y)
-    predictions = Dense(2, activation='softmax', name='out')(y)
+    y = Dense(1024, activation='relu')(y)
+    y = Dense(1024, activation='relu')(y)
+    predictions = Dense(2, activation='softmax')(y)
 
     model = Model(img_input, output=predictions)
 
@@ -151,7 +153,7 @@ def train_res_detect_net():
     model, x = res_detect_net()
 
     checkpointer = ModelCheckpoint(filepath="/home/ubuntu/storage_volume/res_detect_net/weights.{epoch:02d}.hdf5", verbose=1)
-    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, callbacks=[checkpointer])
+    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128, callbacks=[checkpointer])
     model.save('/home/ubuntu/storage_volume/res_detect_net/res_detect_net.h5')
 
 
