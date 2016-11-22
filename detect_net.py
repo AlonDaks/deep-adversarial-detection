@@ -10,7 +10,7 @@ from tensorflow.python.platform import flags
 from resnet50 import ResNet50
 from keras.models import Model, load_model
 from keras.utils import np_utils
-from keras.layers import Dense, Flatten, Convolution2D, MaxPooling2D, ZeroPadding2D, AveragePooling2D
+from keras.layers import Dense, Flatten, Convolution2D, MaxPooling2D, ZeroPadding2D, AveragePooling2D, BatchNormalization
 
 from PIL import Image
 import os
