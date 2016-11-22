@@ -104,6 +104,11 @@ def alex_detect_net():
 
     img_input = x
 
+    if K.image_dim_ordering() == 'tf':
+        bn_axis = 3
+    else:
+        bn_axis = 1
+
     y = ZeroPadding2D((3, 3))(img_input)
     y = Convolution2D(96, 11, 11, subsample=(4, 4), name='conv1')(y)
     y = BatchNormalization(axis=bn_axis, name='bn_conv1', mode=mode)(y)
