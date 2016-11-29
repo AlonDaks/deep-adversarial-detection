@@ -102,7 +102,7 @@ def alex_detect_net(mode=2):
     # Define input TF placeholder
     x = tf.placeholder(tf.float32, shape=(None, 3, 224, 224))
 
-    img_input = x
+    img_input = Input(shape=(None, 3, 244, 244))
 
     if K.image_dim_ordering() == 'tf':
         bn_axis = 3
