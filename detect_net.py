@@ -111,7 +111,7 @@ def alex_detect_net(mode=2):
 
     model = Sequential()
 
-    model.add(ZeroPadding2D((3, 3)))
+    model.add(ZeroPadding2D((3, 3), input_shape=(3, 224, 224)))
     model.add(Convolution2D(96, 11, 11, subsample=(4, 4), name='conv1'))
     model.add(BatchNormalization(axis=bn_axis, name='bn_conv1', mode=mode))
     model.add(Activation('relu'))
