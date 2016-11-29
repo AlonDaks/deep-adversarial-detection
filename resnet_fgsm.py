@@ -116,11 +116,11 @@ def main(argv=None):
 
     num_train_images = 40000
     num_test_images = 10000
-    proc_batch_size = 100 #5000
-    num_normal_batch = 90 #4250
+    proc_batch_size = 5000
+    num_normal_batch = 4250
     num_adv_batch = proc_batch_size - num_normal_batch
 
-    f = h5py.File(os.path.join(FLAGS.storage, 'data.h5'), 'w')
+    f = h5py.File(os.path.join(FLAGS.storage, 'data_shuffled.h5'), 'w')
     f.create_dataset('X_train', (num_train_images, 3, FLAGS.img_rows, FLAGS.img_cols))
     f.create_dataset('labels_train', (num_train_images, FLAGS.nb_classes))
     f.create_dataset('adversarial_labels_train', (num_train_images, 2))
