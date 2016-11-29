@@ -78,11 +78,9 @@ def data_resnet(start_ind, end_ind):
         image = np.expand_dims(image, axis=0)
         image = preprocess_input(image)
         images[i,:,:,:] = image
-
     images = images.astype('float32')
     X = images
     Y = np_utils.to_categorical(labels[start_ind:end_ind], FLAGS.nb_classes)
-
     return X, Y
 
 def main(argv=None):
@@ -118,8 +116,8 @@ def main(argv=None):
 
     num_train_images = 40000
     num_test_images = 10000
-    proc_batch_size = 5000
-    num_normal_batch = 4250
+    proc_batch_size = 100 #5000
+    num_normal_batch = 90 #4250
     num_adv_batch = proc_batch_size - num_normal_batch
 
     f = h5py.File(os.path.join(FLAGS.storage, 'data.h5'), 'w')
@@ -135,7 +133,7 @@ def main(argv=None):
         inds = np.random.permutation(np.arange(proc_batch_size))
 
         X, Y = data_resnet(i, i+proc_batch_size)
-        X_adv = batch_eval(sess, [x], [adv_x], [X[num_normal_batch:,:,:,:]])
+        X_adv = np.squeeze(np.array(batch_eval(sess, [x], [adv_x], [X[num_normal_batch:,:,:,:]])), axis=(0,))
         X_norm = X[:num_normal_batch,:,:,:]
         X_combined = np.stack((X_norm, X_adv), axis=0)
         # f['X_train'][i:i+num_normal_batch, :]  = X_norm
