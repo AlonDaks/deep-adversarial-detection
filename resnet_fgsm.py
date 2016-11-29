@@ -140,8 +140,8 @@ def main(argv=None):
         # f['X_train'][i+num_normal_batch:i+proc_batch_size, :]  = X_adv
         f['X_train'][i:i+proc_batch_size] = X_combined[inds, :]
 
-        print "Accuracy on normal images: {0}".format(tf_model_eval(sess, x, y, predictions, X_norm, Y[:num_normal_batch,:]))
-        print "Accuracy on adversarial images: {0}".format(tf_model_eval(sess, x, y, predictions, X_adv, Y[num_normal_batch:,:]))
+        # print "Accuracy on normal images: {0}".format(tf_model_eval(sess, x, y, predictions, X_norm, Y[:num_normal_batch,:]))
+        # print "Accuracy on adversarial images: {0}".format(tf_model_eval(sess, x, y, predictions, X_adv, Y[num_normal_batch:,:]))
 
         f['labels_train'][i:i+proc_batch_size, :] = Y[inds,:]
         f['adversarial_labels_train'][i:i+proc_batch_size, :] = np_utils.to_categorical(np.array([0]*num_normal_batch + [1]*num_adv_batch))[inds,:]
