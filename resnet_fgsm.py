@@ -135,7 +135,7 @@ def main(argv=None):
         X, Y = data_resnet(i, i+proc_batch_size)
         X_adv = np.squeeze(np.array(batch_eval(sess, [x], [adv_x], [X[num_normal_batch:,:,:,:]])), axis=(0,))
         X_norm = X[:num_normal_batch,:,:,:]
-        X_combined = np.stack((X_norm, X_adv), axis=0)
+        X_combined = np.vstack((X_norm, X_adv))
         # f['X_train'][i:i+num_normal_batch, :]  = X_norm
         # f['X_train'][i+num_normal_batch:i+proc_batch_size, :]  = X_adv
         f['X_train'][i:i+proc_batch_size] = X_combined[inds, :]
