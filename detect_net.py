@@ -167,7 +167,7 @@ def train_alex_detect_net():
     model = alex_detect_net()
 
     checkpointer = ModelCheckpoint(filepath="/home/ubuntu/storage_volume/alex_detect_net/weights.{epoch:02d}.hdf5", verbose=1)
-    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, callbacks=[checkpointer])
+    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=64, callbacks=[checkpointer])
     model.save('/home/ubuntu/storage_volume/alex_detect_net/alex_detect_net.h5')
 
 
