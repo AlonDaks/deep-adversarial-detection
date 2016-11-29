@@ -137,7 +137,7 @@ def alex_detect_net(mode=2):
     # y = Flatten()(y)
 
     #Flatten
-    tf.reshape(y, [-1, np.prod(y.get_shape()[1:].as_list())])
+    y = tf.reshape(y, [-1, np.prod(y.get_shape()[1:].as_list())])
     y = Dense(1024, activation='relu')(y)
     y = Dense(1024, activation='relu')(y)
     predictions = Dense(2, activation='softmax')(y)
