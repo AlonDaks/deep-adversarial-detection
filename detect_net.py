@@ -8,7 +8,7 @@ from tensorflow.python.platform import app
 from tensorflow.python.platform import flags
 
 from resnet50 import ResNet50
-from keras.models import Model, load_model
+from keras.models import Model, load_model, Sequential
 from keras.utils import np_utils
 from keras.layers import Dense, Activation, Flatten, Convolution2D, MaxPooling2D, ZeroPadding2D, AveragePooling2D, BatchNormalization
 
@@ -100,54 +100,55 @@ def res_detect_net():
 def alex_detect_net(mode=2):
 
     # Define input TF placeholder
-    x = tf.placeholder(tf.float32, shape=(None, 3, 224, 224))
+    # x = tf.placeholder(tf.float32, shape=(None, 3, 224, 224))
 
-    img_input = Input(shape=(None, 3, 244, 244))
+    # img_input = Input(shape=(None, 3, 244, 244))
 
     if K.image_dim_ordering() == 'tf':
         bn_axis = 3
     else:
         bn_axis = 1
 
-    y = ZeroPadding2D((3, 3))(img_input)
-    y = Convolution2D(96, 11, 11, subsample=(4, 4), name='conv1')(y)
-    y = BatchNormalization(axis=bn_axis, name='bn_conv1', mode=mode)(y)
-    y = Activation('relu')(y)
-    y = MaxPooling2D((3, 3), strides=(2, 2))(y)
+    model = Sequential()
 
-    y = Convolution2D(256, 5, 5, name='conv2')(y)
-    y = BatchNormalization(axis=bn_axis, name='bn_conv2', mode=mode)(y)
-    y = Activation('relu')(y)
-    y = MaxPooling2D((3, 3), strides=(2, 2))(y)
+    model.add(ZeroPadding2D((3, 3), input_shape=(3, 224, 224)))
+    model.add(Convolution2D(96, 11, 11, subsample=(4, 4), name='conv1'))
+    model.add(BatchNormalization(axis=bn_axis, name='bn_conv1', mode=mode))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D((3, 3), strides=(2, 2)))
 
-    y = Convolution2D(384, 3, 3, name='conv3')(y)
-    y = BatchNormalization(axis=bn_axis, name='bn_conv3', mode=mode)(y)
-    y = Activation('relu')(y)
+    model.add(Convolution2D(256, 5, 5, name='conv2'))
+    model.add(BatchNormalization(axis=bn_axis, name='bn_conv2', mode=mode))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D((3, 3), strides=(2, 2)))
 
-    y = Convolution2D(384, 3, 3, name='conv4')(y)
-    y = BatchNormalization(axis=bn_axis, name='bn_conv4', mode=mode)(y)
-    y = Activation('relu')(y)
+    model.add(Convolution2D(384, 3, 3, name='conv3'))
+    model.add(BatchNormalization(axis=bn_axis, name='bn_conv3', mode=mode))
+    model.add(Activation('relu'))
 
-    y = Convolution2D(384, 3, 3, name='conv5')(y)
-    y = BatchNormalization(axis=bn_axis, name='bn_conv5', mode=mode)(y)
-    y = Activation('relu')(y)
-
-    y = MaxPooling2D((3, 3), strides=(2, 2))(y)
+    model.add(Convolution2D(384, 3, 3, name='conv4'))
+    model.add(BatchNormalization(axis=bn_axis, name='bn_conv4', mode=mode))
+    model.add(Activation('relu'))
+    model.add(Convolution2D(384, 3, 3, name='conv5'))
+    model.add(BatchNormalization(axis=bn_axis, name='bn_conv5', mode=mode))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D((3, 3), strides=(2, 2)))
 
     # y = Flatten()(y)
 
     #Flatten
-    y = tf.reshape(y, [-1, np.prod(y.get_shape()[1:].as_list())])
-    y = Dense(1024, activation='relu')(y)
-    y = Dense(1024, activation='relu')(y)
-    predictions = Dense(2, activation='softmax')(y)
+    # y = tf.reshape(y, [-1, np.prod(y.get_shape()[1:].as_list())])
+    model.add(Flatten())
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(1024, activation='relu'))
+    model.add(Dense(2, activation='softmax'))
 
-    model = Model(img_input, output=predictions)
+    # model = Model(img_input, output=predictions)
 
     # model = make_parallel(model, 4)
     model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
-    return model, x 
+    return model
 
 
 def train_res_detect_net():
@@ -163,10 +164,10 @@ def train_res_detect_net():
 def train_alex_detect_net():
     data = h5py.File(os.path.join(FLAGS.data_dir, 'data.h5'), 'r')
     K.set_image_dim_ordering('th')
-    model, x = alex_detect_net()
+    model = alex_detect_net()
 
     checkpointer = ModelCheckpoint(filepath="/home/ubuntu/storage_volume/alex_detect_net/weights.{epoch:02d}.hdf5", verbose=1)
-    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, callbacks=[checkpointer])
+    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=64, callbacks=[checkpointer])
     model.save('/home/ubuntu/storage_volume/alex_detect_net/alex_detect_net.h5')
 
 
