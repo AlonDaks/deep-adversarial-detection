@@ -145,7 +145,7 @@ def alex_detect_net(mode=2):
 
     # model = Model(img_input, output=predictions)
 
-    # model = make_parallel(model, 4)
+    model = make_parallel(model, 4)
     model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
 
     return model
@@ -167,7 +167,7 @@ def train_alex_detect_net():
     model = alex_detect_net()
 
     checkpointer = ModelCheckpoint(filepath="/home/ubuntu/storage_volume/alex_detect_net/weights.{epoch:02d}.hdf5", verbose=1)
-    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=64, callbacks=[checkpointer])
+    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, callbacks=[checkpointer])
     model.save('/home/ubuntu/storage_volume/alex_detect_net/alex_detect_net.h5')
 
 
