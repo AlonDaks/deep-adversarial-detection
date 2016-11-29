@@ -162,13 +162,13 @@ def train_res_detect_net():
 
 
 def train_alex_detect_net():
-    data = h5py.File(os.path.join(FLAGS.data_dir, 'data.h5'), 'r')
+    data = h5py.File(os.path.join(FLAGS.data_dir, 'data_shuffled.h5'), 'r')
     K.set_image_dim_ordering('th')
     model = alex_detect_net()
 
     checkpointer = ModelCheckpoint(filepath="/home/ubuntu/storage_volume/alex_detect_net/weights.{epoch:02d}.hdf5", verbose=1)
-    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, callbacks=[checkpointer])
-    model.save('/home/ubuntu/storage_volume/alex_detect_net/alex_detect_net.h5')
+    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, nb_epoch=50, callbacks=[checkpointer])
+    model.save('/home/ubuntu/storage_volume/alex_detect_net/alex_detect_net_50_epochs.h5')
 
 
 def main(model='alex_detect_net'):
