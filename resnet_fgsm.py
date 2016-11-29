@@ -116,8 +116,8 @@ def main(argv=None):
 
     num_train_images = 40000
     num_test_images = 10000
-    proc_batch_size = 5000
-    num_normal_batch = 4250
+    proc_batch_size = 2000
+    num_normal_batch = 1700
     num_adv_batch = proc_batch_size - num_normal_batch
 
     f = h5py.File(os.path.join(FLAGS.storage, 'data_shuffled.h5'), 'w')
