@@ -8,7 +8,7 @@ from tensorflow.python.platform import app
 from tensorflow.python.platform import flags
 
 from resnet50 import ResNet50
-from keras.models import Model, load_model
+from keras.models import Model, load_model, Sequential
 from keras.utils import np_utils
 from keras.layers import Dense, Activation, Flatten, Convolution2D, MaxPooling2D, ZeroPadding2D, AveragePooling2D, BatchNormalization
 
