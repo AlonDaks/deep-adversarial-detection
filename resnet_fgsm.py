@@ -123,23 +123,30 @@ def main(argv=None):
     num_adv_batch = proc_batch_size - num_normal_batch
 
     f = h5py.File(os.path.join(FLAGS.storage, 'data.h5'), 'w')
-    f.create_dataset('X_train', (num_train_images, 3, FLAGS.img_rows, FLAGS.img_cols), chunks=True)
-    f.create_dataset('labels_train', (num_train_images, FLAGS.nb_classes), chunks=True)
-    f.create_dataset('adversarial_labels_train', (num_train_images, 2), chunks=True)
-    f.create_dataset('X_test', (num_test_images, 3, FLAGS.img_rows, FLAGS.img_cols), chunks=True)
-    f.create_dataset('labels_test', (num_test_images, FLAGS.nb_classes), chunks=True)
-    f.create_dataset('adversarial_labels_test', (num_test_images, 2), chunks=True)
+    f.create_dataset('X_train', (num_train_images, 3, FLAGS.img_rows, FLAGS.img_cols))
+    f.create_dataset('labels_train', (num_train_images, FLAGS.nb_classes))
+    f.create_dataset('adversarial_labels_train', (num_train_images, 2))
+    f.create_dataset('X_test', (num_test_images, 3, FLAGS.img_rows, FLAGS.img_cols))
+    f.create_dataset('labels_test', (num_test_images, FLAGS.nb_classes))
+    f.create_dataset('adversarial_labels_test', (num_test_images, 2))
 
     #Generate training images
     for i in np.arange(0, num_train_images, proc_batch_size):
+        inds = np.random.permutation(np.arange(proc_batch_size))
+
         X, Y = data_resnet(i, i+proc_batch_size)
         X_adv = batch_eval(sess, [x], [adv_x], [X[num_normal_batch:,:,:,:]])
         X_norm = X[:num_normal_batch,:,:,:]
-        f['X_train'][i:i+num_normal_batch, :]  = X_norm
-        f['X_train'][i+num_normal_batch:i+proc_batch_size, :]  = X_adv
+        X_combined = np.stack((X_norm, X_adv), axis=0)
+        # f['X_train'][i:i+num_normal_batch, :]  = X_norm
+        # f['X_train'][i+num_normal_batch:i+proc_batch_size, :]  = X_adv
+        f['X_train'][i:i+proc_batch_size] = X_combined[inds, :]
 
-        f['labels_train'][i:i+proc_batch_size, :] = Y
-        f['adversarial_labels_train'][i:i+proc_batch_size, :] = np_utils.to_categorical(np.array([0]*num_normal_batch + [1]*num_adv_batch))
+        print "Accuracy on normal images: {0}".format(tf_model_eval(sess, x, y, predictions, X_norm, Y[:num_normal_batch,:]))
+        print "Accuracy on adversarial images: {0}".format(tf_model_eval(sess, x, y, predictions, X_adv, Y[num_normal_batch:,:]))
+
+        f['labels_train'][i:i+proc_batch_size, :] = Y[inds,:]
+        f['adversarial_labels_train'][i:i+proc_batch_size, :] = np_utils.to_categorical(np.array([0]*num_normal_batch + [1]*num_adv_batch))[inds,:]
         f.flush()
 
     print "Generated Training Data"
