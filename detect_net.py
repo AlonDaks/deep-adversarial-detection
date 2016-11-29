@@ -134,7 +134,10 @@ def alex_detect_net(mode=2):
 
     y = MaxPooling2D((3, 3), strides=(2, 2))(y)
 
-    y = Flatten()(y)
+    # y = Flatten()(y)
+
+    #Flatten
+    tf.reshape(y, [-1, np.prod(y.get_shape()[1:].as_list())])
     y = Dense(1024, activation='relu')(y)
     y = Dense(1024, activation='relu')(y)
     predictions = Dense(2, activation='softmax')(y)
