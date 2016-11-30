@@ -121,9 +121,6 @@ def main(argv=None):
     num_adv_batch = proc_batch_size - num_normal_batch
 
     f = h5py.File(os.path.join(FLAGS.storage, 'data_test.h5'), 'w')
-    f.create_dataset('X_train', (num_train_images, 3, FLAGS.img_rows, FLAGS.img_cols))
-    f.create_dataset('labels_train', (num_train_images, FLAGS.nb_classes))
-    f.create_dataset('adversarial_labels_train', (num_train_images, 2))
     f.create_dataset('X_test', (num_test_images, 3, FLAGS.img_rows, FLAGS.img_cols))
     f.create_dataset('labels_test', (num_test_images, FLAGS.nb_classes))
     f.create_dataset('adversarial_labels_test', (num_test_images, 2))
