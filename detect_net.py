@@ -93,7 +93,7 @@ def res_detect_net():
         layer.trainable = False
 
     model = make_parallel(model, 4)
-    rmsprop = RMSprop(lr=100)
+    rmsprop = RMSprop(lr=0.001)
     model.compile(optimizer=rmsprop, loss='binary_crossentropy')
 
     return model, x
@@ -168,9 +168,9 @@ def train_alex_detect_net():
     K.set_image_dim_ordering('th')
     model = alex_detect_net()
 
-    checkpointer = ModelCheckpoint(filepath="/home/ubuntu/storage_volume/alex_detect_net/weights_lr_100.{epoch:02d}.hdf5", verbose=1)
-    model.fit(data['X_train'], data['adversarial_labels_train'], shuffle='batch', batch_size=128*4, nb_epoch=5, callbacks=[checkpointer])
-    model.save('/home/ubuntu/storage_volume/alex_detect_net/alex_detect_net_5_epochs_lr_100.h5')
+    checkpointer = ModelCheckpoint(filepath="/home/ubuntu/storage_volume/alex_detect_net/weights_lr_point_001_weighted.{epoch:02d}.hdf5", verbose=1)
+    model.fit(data['X_train'], data['adversarial_labels_train'], class_weight={0:1.5, 1:8.5}, shuffle='batch', batch_size=128*4, nb_epoch=10, callbacks=[checkpointer])
+    model.save('/home/ubuntu/storage_volume/alex_detect_net/alex_detect_net_lr_point_001_weighted.h5')
 
 
 def main(model='alex_detect_net'):
