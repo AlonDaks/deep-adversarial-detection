@@ -113,7 +113,8 @@ def generate_adversarial():
     x = model.inputs[0]
     predictions = model.outputs[0]
 
-    epsilons = [25, 10, 5, 1, 0.5]
+    # epsilons = [25, 10, 5, 1, 0.5]
+    epsilons = [0.05]
 
     def get_random_halves(n):
         p = np.random.permutation(np.arange(n))
@@ -155,6 +156,62 @@ def generate_adversarial():
             y_train = y_train,
             y_test = y_test)
 
+        print model.evaluate(X_train, y_train)
+
+def get_le_detect_model(filename=None):
+    if filename == None:
+        model = Sequential()
+        model.add(Convolution2D(6, 5, 5, border_mode='valid', input_shape=(1, 28, 28)))
+        model.add(MaxPooling2D((2,2), strides=(1,1)))
+        model.add(Flatten())
+        model.add(Dense(50))
+        model.add(Dense(50))
+        model.add(Dense(2, activation='softmax'))
+    else:
+        model = load_model(filename)
+
+    model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['accuracy'])
+    return model
+
+def train_le_detect_net():
+    keras.backend.set_image_dim_ordering('th')
+
+    data = np.load('data/mnist_modified_eps_0.05.npz')
+
+    model = get_le_detect_model()
+    checkpointer = ModelCheckpoint(filepath="lenet_weights_epoch.{epoch:02d}.hdf5", verbose=1)
+    model.fit(data['X_train'], data['y_train_adv'], callbacks=[checkpointer])
+    model.save('lenet_trained_weights.h5')
+
+    results = model.evaluate(data['X_test'], data['y_test_adv'])
+    print results
+
+def adversarial_le_detect_net():
+    keras.backend.set_image_dim_ordering('th')
+    sess = tf.Session()
+    keras.backend.set_session(sess)
+
+    data = np.load('data/mnist_modified_eps_0.05.npz')
+    model = load_model('weights/eps005/lenet_trained_weights.h5')
+
+    print model.evaluate(data['X_test'], data['y_test_adv'])
+
+    x = model.inputs[0]
+    predictions = model.outputs[0]
+    adv_x = fgsm(x, predictions, eps=10)
+
+    X_adv = batch_eval(sess, [x], [adv_x], [data['X_test']])
+
+    print np.sum(data['X_test'] - X_adv)
+
+    print model.evaluate(X_adv, data['y_test_adv'])
+
+    return data['X_test'], X_adv, data['y_test_adv']
+
+
+
+
+
 
 def main():
     keras.backend.set_image_dim_ordering('th')
@@ -165,8 +222,13 @@ def main():
     model.save('lenet_trained_weights.h5')
 
 
+
+
 if __name__ == '__main__':
-    generate_adversarial()
+    # generate_adversarial()
+    # train_le_detect_net()
+    X, adv, y = adversarial_le_detect_net()
+    np.save('adversarial.txt', adv)
 
 
 
