@@ -124,17 +124,17 @@ def alex_detect_net(mode=2):
     model.add(Activation('relu'))
     model.add(MaxPooling2D((3, 3), strides=(2, 2)))
 
-    model.add(Convolution2D(384, 3, 3, name='conv3'))
-    # model.add(BatchNormalization(axis=bn_axis, name='bn_conv3', mode=mode))
-    model.add(Activation('relu'))
+    # model.add(Convolution2D(384, 3, 3, name='conv3'))
+    # # model.add(BatchNormalization(axis=bn_axis, name='bn_conv3', mode=mode))
+    # model.add(Activation('relu'))
 
-    model.add(Convolution2D(384, 3, 3, name='conv4'))
-    # model.add(BatchNormalization(axis=bn_axis, name='bn_conv4', mode=mode))
-    model.add(Activation('relu'))
-    model.add(Convolution2D(384, 3, 3, name='conv5'))
+    # model.add(Convolution2D(384, 3, 3, name='conv4'))
+    # # model.add(BatchNormalization(axis=bn_axis, name='bn_conv4', mode=mode))
+    # model.add(Activation('relu'))
+    # model.add(Convolution2D(384, 3, 3, name='conv5'))
     # model.add(BatchNormalization(axis=bn_axis, name='bn_conv5', mode=mode))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D((3, 3), strides=(2, 2)))
+    # model.add(Activation('relu'))
+    # model.add(MaxPooling2D((3, 3), strides=(2, 2)))
 
     # y = Flatten()(y)
 
